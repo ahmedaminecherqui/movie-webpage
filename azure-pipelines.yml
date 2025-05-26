@@ -1,0 +1,38 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+    trigger:
+     - main
+
+    pool:
+       vmImage: ubuntu-latest
+
+    steps:
+       - task: CopyFiles@2
+         inputs:
+           SourceFolder: '$(System.DefaultWorkingDirectory)'
+           Contents: '**/*.html'
+           TargetFolder: '$(Build.ArtifactStagingDirectory)/site'
+         displayName: 'Copy HTML files to staging directory'
+
+       - task: CopyFiles@2
+         inputs:
+           SourceFolder: '$(System.DefaultWorkingDirectory)'
+           Contents: |
+             package.json
+             index.js
+           TargetFolder: '$(Build.ArtifactStagingDirectory)/site'
+         displayName: 'Copy package.json and index.js to staging directory'
+
+       - script: npm install
+         workingDirectory: '$(Build.ArtifactStagingDirectory)/site'
+         displayName: 'Install dependencies'
+
+       - task: PublishBuildArtifacts@1
+         inputs:
+           pathToPublish: '$(Build.ArtifactStagingDirectory)/site'
+           artifactName: 'movie-webpage'
+           publishLocation: 'Container'
+         displayName: 'Publish build artifacts'
